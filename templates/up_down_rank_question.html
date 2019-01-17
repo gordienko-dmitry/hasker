@@ -1,0 +1,50 @@
+<div class="row strip justify-content-center">
+    <a class="up-click-q" href="" name="{{id}}">
+        {% if up_down == "up" %}
+        <div class="v-a">
+            <svg aria-hidden="true" class="svg-icon m0 iconArrowUpLg" width="36" height="36"
+                 viewBox="0 0 36 36">
+                <path d="M2 26h32L18 10z"></path>
+            </svg>
+        </div>
+        {% else %}
+
+
+        <div class="v-g">
+            <svg aria-hidden="true" class="svg-icon m0 iconArrowUpLg" width="36" height="36"
+                 viewBox="0 0 36 36">
+                <path d="M2 26h32L18 10z"></path>
+            </svg>
+        </div>
+        {% endif %}
+    </a>
+</div>
+<div slass="row strip justify-content-center" id="rank{{answer.id}}">
+    {{rank}}
+</div>
+
+<div class="row strip justify-content-center">
+    <a class="down-click-q" href="" name="{{id}}">
+
+        {% if up_down == "down" %}
+
+        <div class="v-a">
+            <svg aria-hidden="true" class="svg-icon m0 iconArrowDownLg" width="36" height="36"
+                 viewBox="0 0 36 36">
+                <path d="M2 10h32L18 26z"></path>
+            </svg>
+        </div>
+        {% else %}
+        <div class="v-g">
+            <svg aria-hidden="true" class="svg-icon m0 iconArrowDownLg" width="36" height="36"
+                 viewBox="0 0 36 36">
+                <path d="M2 10h32L18 26z"></path>
+            </svg>
+        </div>
+        {% endif %}
+    </a>
+</div>
+
+
+
+

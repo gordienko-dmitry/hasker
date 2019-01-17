@@ -1,0 +1,19 @@
+<nav aria-label="Page navigation example">
+    {% if count > 1 %}
+    <ul class="pagination justify-content-center">
+        {% for page_prev in prev_pages %}
+        <li class="page-item">
+            <a class="page-link click-page">{{page_prev}}</a>
+        </li>
+        {% endfor %}
+        <li class="page-item disabled">
+            <a class="page-link click-page" id="current-page">{{page}}</a>
+        </li>
+        {% for page_next in next_pages %}
+        <li class="page-item">
+            <a class="page-link click-page">{{page_next}}</a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</nav>

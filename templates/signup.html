@@ -1,0 +1,23 @@
+
+{% extends 'base.html' %}
+  {% block main_content %}
+
+
+
+    <form method="POST" action="{% url 'signup' %}" class="form-signin">
+        {% csrf_token %}
+         <h1 class="h3 mb-3 font-weight-normal">SIGN UP</h1>
+        {% for field in form %}
+            <div class="form-group label-input">
+                {{ field.label }}
+                <input class="form-control" type="{{field.field.widget.input_type }}" name={{field.name}} placeholder="" required>
+                <!--{{ field }}-->
+            </div>
+            {% endfor %}
+      <div class="form-group">
+          <button class="btn btn-warning btn-block" type="submit">Sign Up</button>
+      </div>
+
+    </form>
+
+  {% endblock %}

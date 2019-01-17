@@ -1,0 +1,8 @@
+<div class="row strip text-right justify-content-end">
+            {{ question.author.username }}
+            {% if request.user.userwithavatar.avatar %}
+            <img class="avatar-sm" src="/{{ answer.author.userwithavatar.avatar }}">
+            {% else %}
+            <img src="{% static '/img/logo_white.png' %}" class="avatar-sm">
+            {% endif %}
+        </div>

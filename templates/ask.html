@@ -1,0 +1,42 @@
+
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block links %}
+    <link href="{% static '/css/bootstrap/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static '/css/base.css' %}" rel="stylesheet">
+    <!--link href="{% static '/css/inputTags.min.css' %}" rel="stylesheet"-->
+{% endblock %}
+  {% block main_content %}
+
+    <form class="form-signin" action="{% url 'ask' %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+        <h1 class="h3 mb-3 font-weight-normal">New Question</h1>
+        <div class="form-group label-input">
+            <label for="id_title">Title</label>
+            <input class="form-control" type="text" name="title" id="id_title" placeholder="" required >
+        </div>
+        <div class="form-group label-input">
+            <label >Question</label>
+            <textarea class="form-control" type="text" name="text" id="id_text" placeholder="" required autofocus >
+            </textarea>
+        </div>
+
+        <div class="form-group label-input">
+            <label>Tags</label>
+            <input  class="form-control" type="text" name="tag" id="tags" placeholder="tags" autofocus>
+        </div>
+
+        <input class="btn btn-lg btn-warning btn-block" type="submit" value="Commit" autocomplete="off"/>
+
+
+    </form>
+
+  {% endblock %}
+
+{% block js_include %}
+<script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+<script src="{% static 'js/inputTags.jquery.min.js' %}"></script>
+<script src="{% static 'js/hasker.js' %}"></script>
+<script type="text/javascript"> window.CSRF_TOKEN = "{{ csrf_token }}"; </script>
+{% endblock %}

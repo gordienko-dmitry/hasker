@@ -1,0 +1,73 @@
+{% load staticfiles %}
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <link rel="icon" href="{% static '/img/logo_white.png' %}">
+
+    <title>{% block title %}Hasker - your own way to coding{% endblock %}</title>
+    {% block links %}
+    <!--link href="{% static '/css/inputTags.min.css' %}" rel="stylesheet"-->
+    <link href="{% static '/css/bootstrap/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static '/css/base.css' %}" rel="stylesheet">
+    {% endblock %}
+</head>
+
+<body class="bg-light">
+{% include 'header.html' %}
+<main role="main" class="container-fluid mt-7">
+    <div class="row">
+        <div class="col col-lg-8 col-sm-8 col-md-8 main-div" id="middle-context">
+            {% block main_content %}
+
+            {% endblock %}
+        </div>
+        {%if error %}
+        {% else %}
+        <div class="col col-lg-4 col-sm-4 col-md-4 ">
+            {% block right-content %}
+            {% load cache %}
+            {% cache 500 rightbar %}
+            <div class="row strip mb-4">
+                <a href="{% url 'ask' %}">
+                    <button type="button" class="btn btn-warning" href="ask">Ask question</button>
+                </a>
+            </div>
+            <div class="row strip mb-1">
+                <h3>Trending</h3>
+            </div>
+            {% for question in trend_questions %}
+            <div class="row strip mb-2">
+                <div class="col col-lg-1 col-md-2 col-sm-3 votes text-center strip">
+                    {{question.rank}}<BR>votes
+                </div>
+                <div class="col col-lg-9 col-md-8 col-sm-7">
+                    <a href="{{ question.get_url }}">
+                        Q: {{ question.title }}
+                    </a>
+                </div>
+
+            </div>
+            <hr class="featurette-divider">
+            {% endfor %}
+            {% endcache %}
+            {% endblock %}
+        </div>
+  {% endif %}
+    </div>
+
+</main>
+{% include 'footer.html' %}
+
+{% block js_include %}
+<script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+<script src="{% static 'js/hasker.js' %}"></script>
+<script type="text/javascript"> window.CSRF_TOKEN = "{{ csrf_token }}"; </script>
+{% endblock %}
+<!--script src="{% static 'js/popper.min.js' %}"></script-->
+<!--script src="{% static 'js/bootstrap.min.js' %}"></script-->
+</body>
+</html>
