@@ -3,4 +3,4 @@ psycopg2-binary
 Pillow
 djangorestframework
 djangorestframework-jwt
-django-swagger-ui
+drf-yasg
