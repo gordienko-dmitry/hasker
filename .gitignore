@@ -1,7 +1,7 @@
 venv/
-
+env/
 __pycache__/
-
+*.save
 .idea/
 
 .DS_Store

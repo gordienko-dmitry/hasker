@@ -19,10 +19,10 @@ from questions import views
 urlpatterns = [
     path('', views.index_page, name='index'),
     path('rest/', include('api.urls')),
-    path('hot/', views.hot_questions, name='hot'),
-    path('login/', views.Login.as_view(), name='login'),
-    path('logout/', views.logout_user, name='logout'),
-    path('signup/', views.SignUp.as_view(), name='signup'),
-    path('profile/', views.profile, name='profile'),
+    path('hot', views.hot_questions, name='hot'),
+    path('login', views.Login.as_view(), name='login'),
+    path('logout', views.logout_user, name='logout'),
+    path('signup', views.SignUp.as_view(), name='signup'),
+    path('profile', views.profile, name='profile'),
     path('', include('questions.urls'))
 ]
