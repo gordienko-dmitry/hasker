@@ -30,7 +30,7 @@
         <div class="col col-lg-4 col-sm-4 col-md-4 ">
             {% block right-content %}
             {% load cache %}
-            {% cache 500 rightbar %}
+            {% cache 30 rightbar %}
             <div class="row strip mb-4">
                 <a href="{% url 'ask' %}">
                     <button type="button" class="btn btn-warning" href="ask">Ask question</button>
