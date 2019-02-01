@@ -34,7 +34,7 @@ $(document).ready(function () {
         var name = this.name;
         $.ajax({
             type: 'POST',
-            url: '/vote',
+            url: '/questions/vote',
             data: {
                 'csrfmiddlewaretoken': window.CSRF_TOKEN,
                 'entity': 'a', 'id': this.name, 'up': true
@@ -51,7 +51,7 @@ $(document).ready(function () {
         var name = this.name;
         $.ajax({
             type: 'POST',
-            url: '/vote',
+            url: '/questions/vote',
             data: {
                 'csrfmiddlewaretoken': window.CSRF_TOKEN,
                 'entity': 'a', 'id': this.name, 'up': false
@@ -68,7 +68,7 @@ $(document).ready(function () {
         var name = this.name;
         $.ajax({
             type: 'POST',
-            url: '/vote',
+            url: '/questions/vote',
             data: {
                 'csrfmiddlewaretoken': window.CSRF_TOKEN,
                 'entity': 'q', 'up': true, 'id': name
@@ -85,7 +85,7 @@ $(document).ready(function () {
         var name = this.name;
         $.ajax({
             type: 'POST',
-            url: '/vote',
+            url: '/questions/vote',
             data: {
                 'csrfmiddlewaretoken': window.CSRF_TOKEN,
                 'entity': 'q', 'up': false, 'id': name
@@ -98,7 +98,7 @@ $(document).ready(function () {
 
     //alert(window.location.pathname);
 
-    if (window.location.pathname == "/ask") {
+    if (window.location.pathname == "/questions/ask") {
         $.fn.inputTags.defaults["errors"] = {
             empty: 'Attention',
             minLength: 'Attention',

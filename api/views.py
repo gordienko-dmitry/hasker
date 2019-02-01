@@ -6,28 +6,14 @@ from django.http import HttpResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
-
 from .serializer import AnswerSerializer, QuestionSerializer, \
     QuestionWithoutTextSerializer, QuestionTrendingSerializer
 
 from questions.models import Answer, Question
 
 from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 
-#params
-param_order = openapi.Parameter('order_by', openapi.IN_QUERY, description="ordering (rating or date)",
-                                type=openapi.TYPE_STRING)
-param_batch = openapi.Parameter('batch', openapi.IN_QUERY, description="number of questions on page",
-                                type=openapi.TYPE_INTEGER)
-param_page = openapi.Parameter('page', openapi.IN_QUERY, description="page number",
-                               type=openapi.TYPE_INTEGER)
-param_count = openapi.Parameter('count', openapi.IN_QUERY, description="count questions in answer",
-                                type=openapi.TYPE_INTEGER)
-param_query = openapi.Parameter('query', openapi.IN_QUERY, description="text of query for searching",
-                                type=openapi.TYPE_STRING)
-param_question_id = openapi.Parameter('question_id', openapi.IN_QUERY, description="id for question",
-                                      type=openapi.TYPE_INTEGER)
+from .swagger_params import *
 
 
 @swagger_auto_schema(method='get', manual_parameters=[param_order, param_batch, param_page])

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block main_content %}
+    <h3 class="text-center">Search results:</h3>
+    <hr class="featurette-divider">
+    {% if count == 0 %}
+        <h5 class="text-center">Emprty query - empty results</h5>
+    {% else %}
+        {% for question in object_list %}
+
+            <div class="row strip mb-3">
+                <div class="col votes text-center">
+                    {{ question.rank }}<BR>Votes
+                </div>
+
+                <div class="col votes text-center">
+                    {{ question.answer_set.count }}<BR>answers
+                </div>
+                <div class="col ml-3">
+                    <div class="row">
+                        <a href="{{ question.get_url }}">
+                            <h4>Q: {{ question.title }}</h4>
+                        </a>
+                    </div>
+                    <div class="row">
+                        <div class="col col-lg-9 strip">
+                            {% for tag in question.all_tags %}
+                                <a href="/search?query=tag:{{ tag }}">
+                <span class="inputTags-item">
+                {{ tag }}
+                </span>
+                                </a>
+                            {% endfor %}
+                        </div>
+                        <div class="col col-lg-3 text-right ">
+                            <div class="row strip justify-content-end">
+                                {{ question.author.username }}
+                                {% if question.author.userwithavatar.avatar %}
+                                    <img class="avatar-sm" src="/{{ answer.author.userwithavatar.avatar }}">
+                                {% else %}
+                                    <img src="{% static '/img/logo_white.png' %}" class="avatar-sm">
+                                {% endif %}
+                            </div>
+                            <div class="row strip text-muted text-right justify-content-end">
+                                asked {{ question.get_text_date }}
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+            <hr class="featurette-divider">
+        {% endfor %}
+
+        {% include 'pages.html' %}
+    {% endif %}
+{% endblock %}

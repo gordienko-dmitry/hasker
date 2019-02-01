@@ -1,19 +1,38 @@
-<nav aria-label="Page navigation example">
-    {% if count > 1 %}
-    <ul class="pagination justify-content-center">
-        {% for page_prev in prev_pages %}
-        <li class="page-item">
-            <a class="page-link click-page">{{page_prev}}</a>
-        </li>
-        {% endfor %}
-        <li class="page-item disabled">
-            <a class="page-link click-page" id="current-page">{{page}}</a>
-        </li>
-        {% for page_next in next_pages %}
-        <li class="page-item">
-            <a class="page-link click-page">{{page_next}}</a>
-        </li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-</nav>
+{% if is_paginated %}
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link click-page" href="?page={{ page_obj.previous_page_number }}">&laquo;</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link click-page">&laquo;</span>
+                </li>
+            {% endif %}
+            {% for i in paginator.page_range %}
+                {% if page_obj.number == i %}
+                    <li class="page-item disabled">
+            <span class="page-link click-page">{{ i }}
+                <span class="sr-only">(current)</span>
+            </span>
+                    </li>
+                {% else %}
+                    <li>
+                        <a class="page-link click-page" href="?page={{ i }}">{{ i }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link click-page" href="?page={{ page_obj.next_page_number }}">&raquo;</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link click-page">&raquo;</span>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}

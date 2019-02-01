@@ -1,6 +1,6 @@
-django
-psycopg2-binary
-Pillow
-djangorestframework
-djangorestframework-jwt
-drf-yasg
+django==2.1.5
+psycopg2-binary==2.7.7
+Pillow==5.4.1
+djangorestframework==3.9.1
+djangorestframework-jwt==1.11.0
+drf-yasg==1.12.1

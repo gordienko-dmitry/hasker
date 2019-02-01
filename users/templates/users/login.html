@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block main_content %}
+
+
+    <form class="text-center" action="{% url 'login' %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <img class="mb-4" src="{% static '/img/logo_white.png' %}" alt="LOGO" width="108" height="108">
+        <h1 class="h3 mb-3 font-weight-normal">Log In</h1>
+        {% for field in form %}
+            <div class="form-group label-input">
+                {{ field.errors }}
+                {{ field }}
+            </div>
+        {% endfor %}
+        <button class="btn btn-lg btn-warning btn-block" type="submit">Log In</button>
+
+        <input type="hidden" id="profile" name="profile" value="{% url 'index' %}"/>
+
+        <hr class="featurette-divider">
+        <p class="mt-3 mb-3 text-muted">&copy; 2018-2019</p>
+    </form>
+
+{% endblock %}

@@ -1,28 +1,28 @@
 from django import forms as django_forms
-from django.contrib.auth import forms as auth_forms
-from django.contrib.auth.models import User
 
 
 class AnswerForm(django_forms.Form):
-    text = django_forms.CharField(label='Text', max_length=2000,
-                                  widget=django_forms.Textarea)
+    text = django_forms.CharField(widget=django_forms.Textarea, required=True)
 
 
 class AskForm(django_forms.Form):
-    title = django_forms.CharField(label="Title", max_length=100)
-    text = django_forms.CharField(label="Text", max_length=2000,
-                                  widget=django_forms.Textarea)
-    tags = django_forms.CharField(label="Tags", required=False)
+    title = django_forms.CharField(widget=django_forms.TextInput(
+        attrs={'class': 'form-control',
+               'type': 'text',
+               'id': 'id_title',
+               'placeholder': ''}
+    ), required=True)
 
+    text = django_forms.CharField(widget=django_forms.Textarea(
+        attrs={'class': 'form-control',
+               'type': 'text',
+               'id': 'id_text',
+               'placeholder': ''}
+    ), required=True)
 
-class SignUpForm(auth_forms.UserCreationForm):
-    email = django_forms.EmailField(label="e-mail")
-
-    class Meta:
-        model = User
-        fields = ('username', 'email', 'password1', 'password2',)
-
-
-class UserProfileForm(django_forms.Form):
-    email = django_forms.EmailField(label="e-mail")
-    avatar = django_forms.ImageField(label="avatar", required=False)
+    tag = django_forms.CharField(widget=django_forms.TextInput(
+        attrs={'class': 'form-control',
+               'type': 'text',
+               'id': 'tags',
+               'placeholder': 'tags'}
+    ), required=False)

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block main_content %}
+
+    <form class="text-left" action="{% url 'profile' %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <img class="mb-4 avatar-big" src="{{ request.user.get_avatar }}" id="photo" name="photo" alt="Choose new photo">
+        <input type="file" hidden accept="image/*,image/jpeg" id="avatar" name="avatar">
+        <h1 class="h3 mb-3 font-weight-normal">{{ request.user.username }}</h1>
+        <div class="form-group label-input text-left">
+            {{ form.email.label_tag }} {{ form.email }}
+        </div>
+        <hr class="featurette-divider">
+        <button class="btn btn-lg btn-warning btn-block" type="submit">Save Changes</button>
+    </form>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block main_content %}
+
+    <div class="row strip mb-5">
+        <ul class="nav nav-tabs">
+            {% if request.path == "/hot" %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'index' %}">New Questions</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{% url 'hot' %}">Hot Questions</a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link active" href="{% url 'index' %}">New Questions</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'hot' %}">Hot Questions</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <hr class="featurette-divider">
+    {% for question in object_list %}
+
+        <div class="row strip mb-3">
+            <div class="col votes strip text-center">
+                {{ question.rank }}<BR>votes
+            </div>
+
+            <div class="col votes strip text-center">
+                {{ question.answer_set.count }}<BR>Answers
+            </div>
+            <div class="col ml-3">
+                <div class="row">
+                    <a href="{{ question.get_url }}">
+                        <h4>Q: {{ question.title }}</h4>
+                    </a>
+                </div>
+                <div class="row">
+                    <div class="col col-lg-9 strip">
+                        {% for tag in question.all_tags %}
+                            <a href="/questions/search?query=tag:{{ tag }}">
+                <span class="inputTags-item-list">
+                {{ tag }}
+                </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                    <div class="col col-lg-3">
+                        <div class="row strip text-right justify-content-end">
+                            {{ question.author.username }}
+                            {% if question.author.userwithavatar.avatar %}
+                                <img class="avatar-sm" src="/{{ answer.author.userwithavatar.avatar }}">
+                            {% else %}
+                                <img src="{% static '/img/logo_white.png' %}" class="avatar-sm">
+                            {% endif %}
+                        </div>
+                        <div class="row strip text-muted text-right justify-content-end">
+                            asked {{ question.get_text_date }}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <hr class="featurette-divider">
+    {% endfor %}
+
+    {% include 'pages.html' %}
+{% endblock %}

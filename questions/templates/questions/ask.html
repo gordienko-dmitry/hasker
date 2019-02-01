@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block main_content %}
+
+    <form class="form-signin" action="{% url 'ask' %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <h1 class="h3 mb-3 font-weight-normal">New Question</h1>
+        {% for field in form %}
+            <div class="form-group label-input">
+                {{ field.errors }}
+                {{ field.label_tag }} {{ field }}
+            </div>
+        {% endfor %}
+        <input class="btn btn-lg btn-warning btn-block" type="submit" value="Commit" autocomplete="off"/>
+    </form>
+
+{% endblock %}
+{% block js_include %}
+    <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'js/inputTags.jquery.min.js' %}"></script>
+    <script src="{% static 'js/hasker.js' %}"></script>
+    <script type="text/javascript"> window.CSRF_TOKEN = "{{ csrf_token }}"; </script>
+{% endblock %}

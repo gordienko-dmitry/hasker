@@ -12,8 +12,6 @@ class NonAuthorizedTest(TestCase):
     One question and one answer
     Let's see, how can non authorized user can use pages:
     - index
-    - login
-    - signup
     - search
     - question
     - other way (404 error)
@@ -45,21 +43,6 @@ class NonAuthorizedTest(TestCase):
         self.assertContains(response, 'Trending', html=True)
         self.assertContains(response, 'Q: ' + self.question_who.title, html=True)
 
-    def test_login(self):
-        response = self.client.get('/login/')
-
-        self.assertContains(response, 'Log In', html=True)
-        self.assertContains(response, 'Username', html=True)
-        self.assertContains(response, 'Password', html=True)
-
-    def test_signup(self):
-        response = self.client.get('/signup/')
-
-        self.assertContains(response, 'SIGN UP', html=True)
-        self.assertContains(response, 'e-mail', html=False)
-        self.assertContains(response, 'Password', html=False)
-        self.assertContains(response, 'Password confirmation', html=False)
-
     def test_search(self):
         response = self.client.get('/search?query=we')
         self.assertEqual(response.status_code, HTTPStatus.OK.value)
@@ -83,12 +66,6 @@ class NonAuthorizedTest(TestCase):
 
         self.assertEqual(response.status_code, 404)
 
-    def test_sign_up(self):
-        response = self.client.post('/signup/', {'username': 'kurtk',
-                                                 'password1': 'smellslikeTS',
-                                                 'password2': 'smellslikeTS',
-                                                 'email': 'kk@vnirvane.com'})
-
         self.assertRedirects(response, '/login/')
         self.assertTrue(User.objects.get(username='kurtk'))
 
@@ -98,8 +75,6 @@ class AuthorizedTest(TestCase):
     One question and one answer
     Let's see, how can non authorized user can use pages:
     - index
-    - login
-    - signup
     - search
     - question
     - other way (404 error)
@@ -155,15 +130,4 @@ class AuthorizedTest(TestCase):
                                               'text': 'Wow, Can I?'})
 
         self.assertTrue(Question.objects.filter(title='my own question').all().count() == 1)
-
-    def test_profile(self):
-        response = self.client.get('/profile/')
-        self.assertContains(response, 'E-mail', html=True)
-
-        response = self.client.post('/profile/', {'email': 'newborn@new.born'})
-
-        self.assertEqual(User.objects.get(id=self.user_somebody.id).email,
-                         'newborn@new.born')
-
-        self.assertRedirects(response, '/profile/')
 

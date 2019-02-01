@@ -1,5 +1,4 @@
 from django.contrib.auth.models import User
-from django.core.paginator import Paginator
 from django.core.mail import EmailMultiAlternatives
 from django.db import models, transaction
 from django.urls import reverse
@@ -7,45 +6,16 @@ from django.utils import timezone
 import hasker.settings as settings
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
+import logging
+
+from users.models import UserWithAvatar
 
 
-EMAIL_TEMPLATE = "<p>Hey, we get new answer on your question:</p> " \
-                 "<p><b>{question_text}</p></b><br>" \
-                 "<p>You can go by this link and read an answer:<p>" \
-                 "<p><a href='{link}'>read answer</a></p><br>" \
-                 "<p>---</p><br>" \
-                 "<p>This is automatic message, please do ot answer</p>"
-
-
-class UserWithAvatar(models.Model):
-    """add avatar to user"""
-    user = models.OneToOneField(to=User,
-                                on_delete=models.CASCADE,
-                                null=False, blank=False)
-    avatar = models.ImageField(upload_to="static/img", null=True)
-
-    @staticmethod
-    def get_user(user_id):
-        """get or create user"""
-        try:
-            return UserWithAvatar.objects.get(user_id=user_id)
-        except UserWithAvatar.DoesNotExist:
-            return UserWithAvatar.objects.create(user_id=user_id)
-
-    def update_profile(self, email, avatar):
-        """change user e-mail or avatar"""
-        with transaction.atomic():
-            if self.user.email != email:
-                self.user.email = email
-                self.user.save()
-
-            if avatar:
-                self.avatar = avatar
-                self.save()
+logger = logging.getLogger("Questions_Models")
 
 
 class Tag(models.Model):
-    text = models.CharField("tag", max_length=50, null=False, blank=False, unique=True,
+    text = models.CharField("Tag", max_length=50, null=False, blank=False, unique=True,
                             error_messages={'unique': "A tag with that text already exists."})
 
     def __str__(self):
@@ -54,31 +24,22 @@ class Tag(models.Model):
 
 class Question(models.Model):
 
-    title = models.CharField(max_length=200, null=False, blank=False)
-    text = models.CharField(max_length=2000, null=False, blank=False)
-    pub_date = models.DateTimeField('date published', null=False, blank=False)
-    tags = models.ManyToManyField(to=Tag, blank=False)
-    author = models.ForeignKey(to=User, on_delete=models.PROTECT,
+    title = models.CharField("Title", max_length=200, null=False, blank=False)
+    text = models.CharField("Text", max_length=2000, null=False, blank=False)
+    pub_date = models.DateTimeField("Publication date", null=False, blank=False, auto_now_add=True)
+    tags = models.ManyToManyField(verbose_name="Tags", to=Tag, blank=False)
+    author = models.ForeignKey(verbose_name="Author", to=UserWithAvatar, on_delete=models.PROTECT,
                                null=False, blank=False)
 
-    rank = models.IntegerField(null=False, default=0)
+    rank = models.IntegerField("Rank", null=False, default=0)
 
-    right_answer = models.IntegerField(null=True)
+    right_answer = models.IntegerField("Right answer", null=True)
 
     @staticmethod
-    def get_questions(hot=False, page=1, batch=None):
-
-        if not batch:
-            batch = settings.QUESTION_BATCH
-
-        if hot:
-            result = Question.objects.order_by("-rank", "-pub_date").all()
-        else:
-            result = Question.objects.order_by("-pub_date", "-rank").all()
-
-        paginator = Paginator(result, batch)
-        result = paginator.get_page(page)
-        return result, paginator.num_pages
+    def get_trend_questions():
+        batch = settings.QUESTION_BATCH
+        result = Question.objects.order_by("-rank", "-pub_date").all()[:batch]
+        return result
 
     @staticmethod
     def create_question(request):
@@ -87,8 +48,7 @@ class Question(models.Model):
             new_question = Question.objects.create(
                 author=request.user,
                 title=request.POST.get("title"),
-                text=request.POST.get("text"),
-                pub_date=timezone.now()
+                text=request.POST.get("text")
             )
 
             # Get all tags from request
@@ -97,11 +57,7 @@ class Question(models.Model):
             # Save not existing tags and add all tags to new question
             for tag_text in tags:
                 if tag_text:
-                    try:
-                        tag = Tag.objects.get(text=tag_text)
-                    except Tag.DoesNotExist:
-                        tag = Tag.objects.create(text=tag_text)
-                        tag.save()
+                    tag, created = Tag.objects.get_or_create(text=tag_text)
                     new_question.tags.add(tag)
 
             new_question.save()
@@ -109,19 +65,15 @@ class Question(models.Model):
             return new_question
 
     @staticmethod
-    def get_search(query, page, batch=None):
-        if not batch:
-            batch = settings.SEARCH_BATCH
-
+    def get_search(query):
         # Handle tags query
         if query[0][:4] == "tag:":
             tag_text = query[0].split(':')[1]
             if not tag_text:
                 tag_text = query[1]
-            questions = Question.objects.all()
             try:
-                tag = Tag.objects.get(text=tag_text).id
-                questions = questions.filter(tags=tag).order_by("-rank", "-pub_date")
+                tag = Tag.objects.get(text=tag_text)
+                questions = Question.objects.filter(tags=tag).order_by("-rank", "-pub_date")
             except Tag.DoesNotExist:
                 questions = None
 
@@ -134,9 +86,7 @@ class Question(models.Model):
             for word in query:
                 questions = questions.filter(models.Q(title__icontains=word) | models.Q(text__icontains=word))
 
-        paginator = Paginator(questions, batch)
-        questions = paginator.get_page(page)
-        return questions, paginator.num_pages
+        return questions
 
     def get_url(self):
         return reverse('question', kwargs={"question_id": self.id})
@@ -163,45 +113,35 @@ class Question(models.Model):
 
     def set_right_answer(self, id_answer, user):
         if user != self.author:
-            return False
-        if self.right_answer == id_answer:
-            self.right_answer = None
-        else:
-            self.right_answer = id_answer
+            return
+        self.right_answer = id_answer if self.right_answer != id_answer else None
         self.save()
-        return True
+        return
 
     def get_text_date(self):
         return get_text_date_entities(self)
 
 
 class Answer(models.Model):
-    text = models.CharField(max_length=2000, null=False, blank=False)
-    pub_date = models.DateTimeField('date published', null=False, blank=False)
-    author = models.ForeignKey(to=User, on_delete=models.PROTECT,
+    text = models.CharField("Text", max_length=2000, null=False, blank=False)
+    pub_date = models.DateTimeField('Publication date', null=False, blank=False, auto_now_add=True)
+    author = models.ForeignKey(verbose_name="Author", to=UserWithAvatar, on_delete=models.PROTECT,
                                null=False, blank=False)
-    question = models.ForeignKey(to=Question, on_delete=models.PROTECT,
+    question = models.ForeignKey(verbose_name="Question", to=Question, on_delete=models.PROTECT,
                                  null=False, blank=False)
 
-    rank = models.IntegerField(null=False, default=0, db_index=True)
+    rank = models.IntegerField("Rank", null=False, default=0, db_index=True)
 
     @staticmethod
-    def get_answers(question, page, batch=None):
-        if not batch:
-            batch = settings.ANSWERS_BATCH
-
-        result = Answer.objects.filter(question=question).order_by("-rank", "-pub_date")
-        paginator = Paginator(result, batch)
-        result = paginator.get_page(page)
-        return result, paginator.num_pages
+    def get_answers(question_id):
+        return Answer.objects.filter(question__id=question_id).order_by("-rank", "-pub_date")
 
     @staticmethod
     def create_answer(request, question):
         new_answer = Answer.objects.create(
             author=request.user,
             question=question,
-            text=request.POST.get("answer_text"),
-            pub_date=timezone.now()
+            text=request.POST.get("answer_text")
         )
 
         new_answer.save()
@@ -211,7 +151,7 @@ class Answer(models.Model):
             subject, from_email, to = "You get an answer to your question", \
                                       'noreply@hasker.com', question.author.email
             text_content = ''
-            html_content = EMAIL_TEMPLATE.format(
+            html_content = settings.EMAIL_TEMPLATE.format(
                 question_text=question.question_text,
                 link=settings.BASE_URL + question.get_url())
 
@@ -246,14 +186,16 @@ class Answer(models.Model):
 
 
 class VotesQuestion(models.Model):
-    voter_entity = models.ForeignKey(to=Question, null=False, blank=False, on_delete=models.CASCADE)
-    user = models.ForeignKey(to=User, null=False, blank=False, on_delete=models.CASCADE)
+    """Users, who votes for question"""
+    voter_entity = models.ForeignKey(verbose_name="Question", to=Question, null=False, blank=False, on_delete=models.CASCADE)
+    user = models.ForeignKey(verbose_name="User", to=UserWithAvatar, null=False, blank=False, on_delete=models.CASCADE)
     up_down = models.CharField("up or down", null=False, max_length=4)
 
 
 class VotesAnswer(models.Model):
-    voter_entity = models.ForeignKey(to=Answer, null=False, blank=False, on_delete=models.CASCADE)
-    user = models.ForeignKey(to=User, null=False, blank=False, on_delete=models.CASCADE)
+    """Users, who votes fot answers"""
+    voter_entity = models.ForeignKey(verbose_name="Answer", to=Answer, null=False, blank=False, on_delete=models.CASCADE)
+    user = models.ForeignKey(verbose_name="User", to=UserWithAvatar, null=False, blank=False, on_delete=models.CASCADE)
     up_down = models.CharField("up or down", null=False, max_length=4)
 
 
@@ -271,32 +213,17 @@ def vote_qa(type_entity, id, up, user_id):
             vote_obj = VotesAnswer.objects.get(user_id=user_id, voter_entity_id=id)
     except (VotesQuestion.DoesNotExist, VotesAnswer.DoesNotExist):
         vote_obj = None
-    except Exception:
+    except Exception as e:
+        logger.exception("false to vote type {}, id {}, up {}, user_id {}, exception {}".
+                         format(type_entity, id, up, user_id, e))
         return None, None
 
     with transaction.atomic():
         if vote_obj:
-            if up:
-                if vote_obj.up_down == "up":
-                    vote_obj.up_down = ""
-                    new_rank = entity.update_rank(id, False)
-                elif vote_obj.up_down == "down":
-                    vote_obj.up_down = "up"
-                    new_rank = entity.update_rank(id, up, 2)
-                else:
-                    vote_obj.up_down = "up"
-                    new_rank = entity.update_rank(id, up)
-            else:
-                if vote_obj.up_down == "down":
-                    vote_obj.up_down = ""
-                    new_rank = entity.update_rank(id, True)
-                elif vote_obj.up_down == "up":
-                    vote_obj.up_down = "down"
-                    new_rank = entity.update_rank(id, up, 2)
-                else:
-                    vote_obj.up_down = "down"
-                    new_rank = entity.update_rank(id, up)
-
+            up_down = "up" if up else "down"
+            vote_obj.up_down = "" if up_down == vote_obj.up_down else up_down
+            num = 2 if vote_obj.up_down and up_down != vote_obj.up_down else 1
+            new_rank = entity.update_rank(id, up if up_down == vote_obj.up_down else not up, num)
             vote_obj.save()
 
         else:
@@ -317,8 +244,12 @@ def get_text_date_entities(entity):
              (now_datetime.month < pub_date.month or
               (now_datetime.month == pub_date.month and now_datetime.day < pub_date.day))):
         delta = timezone.now() - entity.pub_date
-        if delta.days < 1 and delta.seconds < 60:
-            return "less than minute ago"
+        if delta.days < 1:
+            if delta.seconds < 60:
+                return "less than minute ago"
+            else:
+                return "today"
+
         if delta.days < 365:
             return "{} days ago".format(delta.days)
 

@@ -10,9 +10,8 @@
 
     <title>{% block title %}Hasker - your own way to coding{% endblock %}</title>
     {% block links %}
-    <!--link href="{% static '/css/inputTags.min.css' %}" rel="stylesheet"-->
-    <link href="{% static '/css/bootstrap/bootstrap.min.css' %}" rel="stylesheet">
-    <link href="{% static '/css/base.css' %}" rel="stylesheet">
+        <link href="{% static '/css/bootstrap/bootstrap.min.css' %}" rel="stylesheet">
+        <link href="{% static '/css/base.css' %}" rel="stylesheet">
     {% endblock %}
 </head>
 
@@ -29,9 +28,9 @@
 {% include 'footer.html' %}
 
 {% block js_include %}
-<script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
-<script src="{% static 'js/hasker.js' %}"></script>
-<script type="text/javascript"> window.CSRF_TOKEN = "{{ csrf_token }}"; </script>
+    <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'js/hasker.js' %}"></script>
+    <script type="text/javascript"> window.CSRF_TOKEN = "{{ csrf_token }}"; </script>
 {% endblock %}
 <!--script src="{% static 'js/popper.min.js' %}"></script-->
 <!--script src="{% static 'js/bootstrap.min.js' %}"></script-->

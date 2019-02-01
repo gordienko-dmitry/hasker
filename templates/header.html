@@ -7,56 +7,50 @@
             </button-->
             <div class="col col-lg-3 col-md-3 col-sm-4">
                 <img alt="LOGO" src="{% static '/img/logo_black.png' %}" title="" width="20" height="20"
-                     style="margin-right: 10px;">
+                     class="mr-10">
                 <a class="navbar-brand" href={% url 'index' %}>H(ask)->er</a>
             </div>
             <div class="col">
                 <div class="row">
-                        <form class="form-inline" id="search" action=/search method="get" autocomplete="off"
-                              role="search">
-                            <input name="query" type="text" placeholder="Search…" value="{{search_text}}" autocomplete="off"
-                                   maxlength="240" class="f-input top-search" id="search-field-js"/>
-                            <button type="submit" aria-label="Search..." id="search-btn-js" class="search-btn"
-                                    style="display: none;">
-                                <a href="/ask" onclick="document.getElementById('search').submit(); alert(41);">
+                    <form class="form-inline" id="search" action='{% url 'search' %}' method="get" autocomplete="off"
+                          role="search">
+                        <input name="query" type="text" placeholder="Search…" value="{{ search_text }}"
+                               autocomplete="off"
+                               maxlength="240" class="f-input top-search" id="search-field-js"/>
+                        <button type="submit" aria-label="Search..." id="search-btn-js" class="search-btn"
+                                style="display: none;">
+                            <a href="{% url 'search' %}"
+                               onclick="document.getElementById('search').submit(); alert(41);">
                                 <svg aria-hidden="true" class="svg-icon iconSearch" width="18" height="18"
                                      viewBox="0 0 18 18">
                                     <path d="M12.86 11.32L18 16.5 16.5 18l-5.18-5.14v-.35a7 7 0 1 1 1.19-1.19h.35zM7 12A5 5 0 1 0 7 2a5 5 0 0 0 0 10z"/>
                                 </svg>
-                                    </a>
-                            </button>
-                        </form>
+                            </a>
+                        </button>
+                    </form>
 
                 </div>
             </div>
             <div class="col col-lg-3 col-md-4 col-sm-6">
                 {% if user.is_authenticated %}
-                <div class="d-flex justify-content-end">
-                    <a href="/profile" style="color: #ffffff;" class="btn btn-dark btn-navbar">
-
-                        {{ request.user.username }}
-
-                        {% if request.user.userwithavatar.avatar %}
-                        <img class="avatar-sm" src="/{{ request.user.userwithavatar.avatar }}" >
-                        {% else %}
-                        <img src="{% static '/img/logo_white.png' %}" class="avatar-sm" >
-                        {% endif %}
-
-                    </a>
-
-                    <a href="/logout">
-                        <button type="button" class="btn btn-warning btn-navbar">Log Out</button>
-                    </a>
-                </div>
+                    <div class="d-flex justify-content-end">
+                        <a href="{% url "profile" %}" class="wh btn btn-dark btn-navbar">
+                            {{ request.user.username }}
+                            <img class="avatar-sm" src="{{ request.user.get_avatar }}">
+                        </a>
+                        <a href="{% url 'logout' %}">
+                            <button type="button" class="btn btn-warning btn-navbar">Log Out</button>
+                        </a>
+                    </div>
                 {% else %}
-                <div class="d-flex justify-content-end">
-                    <a href="/login">
-                        <button type="button" class="btn btn-dark btn-navbar">Log In</button>
-                    </a>
-                    <a href="/signup">
-                        <button type="button" class="btn btn-warning btn-navbar">Sign Up</button>
-                    </a>
-                </div>
+                    <div class="d-flex justify-content-end">
+                        <a href="{% url 'login' %}">
+                            <button type="button" class="btn btn-dark btn-navbar">Log In</button>
+                        </a>
+                        <a href="{% url 'signup' %}">
+                            <button type="button" class="btn btn-warning btn-navbar">Sign Up</button>
+                        </a>
+                    </div>
                 {% endif %}
             </div>
         </div>

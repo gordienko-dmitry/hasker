@@ -3,7 +3,8 @@ env/
 __pycache__/
 *.save
 .idea/
-
 .DS_Store
-
 *.log
+media/
+secret_key.txt
+hasker/local_settings.py
