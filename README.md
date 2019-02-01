@@ -24,7 +24,7 @@ Available links:
 
 ```
 
-Done with CBA technology.
+Done with CBV technology.
 
 
 ### Deploy site:  
