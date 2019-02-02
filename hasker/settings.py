@@ -5,9 +5,6 @@ import datetime
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_NAME = 'Hasker'
 
-# For prod DEBUG flag sets in local_settings.py
-DEBUG = True
-
 ALLOWED_HOSTS = ['*']
 
 # Application definition

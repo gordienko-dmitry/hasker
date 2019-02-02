@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'basetrending.html' %}
 {% block main_content %}
     {% load staticfiles %}
     <div class="row strip">
@@ -78,6 +78,17 @@
             <!--hr class="featurette-divider md-3"-->
             <div class="row strip">
                 {{ question.text }}
+            </div>
+            <div class="ros strip">
+                <div class="col col-lg-9 strip">
+                    {% for tag in question.tags.all %}
+                        <a href="{% url 'search' %}?query=tag:{{ tag }}">
+                <span class="inputTags-item">
+                {{ tag }}
+                </span>
+                        </a>
+                    {% endfor %}
+                </div>
             </div>
             <div class="row strip text-right d-flex justify-content-end">
 
@@ -323,7 +334,7 @@
                             {% if request.user == question.author %}
                                 <div class="row strip justify-content-center mt-2 mb-2 v-g">
                                     <a class="v-g tight-click"
-                                       href="/right_answer?id={{ question.id }}&answer_id={{ answer.id }}"
+                                       href="{% url 'right_answer' %}?id={{ question.id }}&answer_id={{ answer.id }}"
                                        name="answer_link">
                                         <svg aria-hidden="true" class="svg-icon iconStar" width="18" height="18"
                                              viewBox="0 0 18 18">

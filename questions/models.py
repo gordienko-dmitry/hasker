@@ -1,4 +1,3 @@
-from django.contrib.auth.models import User
 from django.core.mail import EmailMultiAlternatives
 from django.db import models, transaction
 from django.urls import reverse
@@ -7,6 +6,8 @@ import hasker.settings as settings
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 import logging
+from django.shortcuts import get_object_or_404
+
 
 from users.models import UserWithAvatar
 
@@ -38,8 +39,7 @@ class Question(models.Model):
     @staticmethod
     def get_trend_questions():
         batch = settings.QUESTION_BATCH
-        result = Question.objects.order_by("-rank", "-pub_date").all()[:batch]
-        return result
+        return Question.objects.order_by("-rank", "-pub_date").all()[:batch]
 
     @staticmethod
     def create_question(request):
@@ -59,9 +59,7 @@ class Question(models.Model):
                 if tag_text:
                     tag, created = Tag.objects.get_or_create(text=tag_text)
                     new_question.tags.add(tag)
-
             new_question.save()
-
             return new_question
 
     @staticmethod
@@ -71,11 +69,7 @@ class Question(models.Model):
             tag_text = query[0].split(':')[1]
             if not tag_text:
                 tag_text = query[1]
-            try:
-                tag = Tag.objects.get(text=tag_text)
-                questions = Question.objects.filter(tags=tag).order_by("-rank", "-pub_date")
-            except Tag.DoesNotExist:
-                questions = None
+            questions = Question.objects.filter(tags__text=tag_text).order_by("-rank", "-pub_date")
 
         # Handle simple search query
         else:
@@ -204,32 +198,22 @@ def vote_qa(type_entity, id, up, user_id):
 
     try:
         if type_entity == "q":
-            entity = Question.objects.get(id=id)
-            vote_class = VotesQuestion
-            vote_obj = VotesQuestion.objects.get(user_id=user_id, voter_entity_id=id)
+            entity = get_object_or_404(Question, id=id)
+            vote_obj = VotesQuestion.objects.get_or_create(user_id=user_id, voter_entity_id=id)[0]
         else:
-            entity = Answer.objects.get(id=id)
-            vote_class = VotesAnswer
-            vote_obj = VotesAnswer.objects.get(user_id=user_id, voter_entity_id=id)
-    except (VotesQuestion.DoesNotExist, VotesAnswer.DoesNotExist):
-        vote_obj = None
+            entity = get_object_or_404(Answer, id=id)
+            vote_obj = VotesAnswer.objects.get_or_create(user_id=user_id, voter_entity_id=id)[0]
     except Exception as e:
         logger.exception("false to vote type {}, id {}, up {}, user_id {}, exception {}".
                          format(type_entity, id, up, user_id, e))
         return None, None
 
     with transaction.atomic():
-        if vote_obj:
-            up_down = "up" if up else "down"
-            vote_obj.up_down = "" if up_down == vote_obj.up_down else up_down
-            num = 2 if vote_obj.up_down and up_down != vote_obj.up_down else 1
-            new_rank = entity.update_rank(id, up if up_down == vote_obj.up_down else not up, num)
-            vote_obj.save()
-
-        else:
-            up_down = "up" if up else "down"
-            vote_obj = vote_class.objects.create(voter_entity=entity, user_id=user_id, up_down=up_down)
-            new_rank = entity.update_rank(id, up)
+        up_down = "up" if up else "down"
+        vote_obj.up_down = "" if up_down == vote_obj.up_down else up_down
+        num = 2 if vote_obj.up_down and up_down != vote_obj.up_down else 1
+        new_rank = entity.update_rank(id, up if up_down == vote_obj.up_down else not up, num)
+        vote_obj.save()
 
     return new_rank, vote_obj.up_down
 
@@ -245,10 +229,7 @@ def get_text_date_entities(entity):
               (now_datetime.month == pub_date.month and now_datetime.day < pub_date.day))):
         delta = timezone.now() - entity.pub_date
         if delta.days < 1:
-            if delta.seconds < 60:
-                return "less than minute ago"
-            else:
-                return "today"
+            return "less than minute ago" if delta.seconds < 60 else "today"
 
         if delta.days < 365:
             return "{} days ago".format(delta.days)

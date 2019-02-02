@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'basetrending.html' %}
 {% load staticfiles %}
 {% block main_content %}
 
@@ -41,8 +41,8 @@
                 </div>
                 <div class="row">
                     <div class="col col-lg-9 strip">
-                        {% for tag in question.all_tags %}
-                            <a href="/questions/search?query=tag:{{ tag }}">
+                        {% for tag in question.tags.all %}
+                            <a href="{% url 'search' %}?query=tag:{{ tag }}">
                 <span class="inputTags-item-list">
                 {{ tag }}
                 </span>
